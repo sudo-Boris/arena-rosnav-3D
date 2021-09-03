@@ -180,8 +180,10 @@ rosdep install --from-paths src --ignore-src -r -y
 
 * To install pedsim (for obstacle management) run the following command: 
 ```bash
-cd ~/catkin_ws/src/arena-rosnav-3D
-git clone https://github.com/eliastreis/pedsim_ros.git
+cd ~/catkin_ws/src/
+git clone https://github.com/eliastreis/pedsim_ros.git -b ros-melodic-gazebo
+../..
+catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
 * To use the cadrl planer install the following ternsorflow version:
 ```bash
