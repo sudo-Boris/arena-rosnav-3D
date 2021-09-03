@@ -188,7 +188,8 @@ git clone https://github.com/eliastreis/pedsim_ros.git
 pip install tensorflow==1.15
 ```  
 
-
+# Note: Install Gazebo from source
+Normally, the gazebo package should be included in the ros-full-desktop version. In case you dont have it, you can install it from source by executing the script provided (install_gazebo.sh). Please see [install_gazebo.md](docs/install_gazebo.md). 
 
 # Error Handling 
 if you encounter the error "world path not given", it is probably because you havent updated the forks repository or working on an old branch.
