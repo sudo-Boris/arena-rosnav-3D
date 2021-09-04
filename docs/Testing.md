@@ -9,7 +9,7 @@ We provide the following four worlds for your use:
 ## Pre-build world
 To select one of our pre-build worlds, specify your scenario by selecting **aws_house**,  turtlebot3_house, small_warehouse *(bold is your default world)* in your startup file:
 ```bash
-roslaunch arena_bringup start_arena_gazebo.launch world:=turtlebot3_house
+roslaunch arena_bringup start_arena_gazebo.launch world:=turtlebot3_house local_planner:=dwa task_mode:=scenario
 ```
 Since our pre-build worlds are very detailed we do not spawn further static obstacles. For obstacle and robot task-management see [here](#task-mode). 
 
