@@ -177,7 +177,7 @@ rosdep install --from-paths src --ignore-src -r -y
 ```bash
 cd ~/catkin_ws/src/
 git clone https://github.com/eliastreis/pedsim_ros.git -b ros-melodic-gazebo
-../..
+..
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
 * To use the cadrl planer install the following ternsorflow version:
