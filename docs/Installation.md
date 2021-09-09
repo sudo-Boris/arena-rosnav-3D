@@ -141,6 +141,8 @@ cd .. && catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 cd $HOME
 mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone https://github.com/eliastreis/arena-rosnav-3D.git
+git clone https://bitbucket.org/acl-swarm/ford_msgs/src/master/
+git clone https://github.com/eliastreis/pedsim_ros.git -b ros-melodic-gazebo
 
 source $HOME/.zshrc
 cd ../.. 
@@ -163,6 +165,8 @@ Add this line above to the beginning of .zshrc or .bashrc
 export PYTHONPATH=""
 ```
 Note: if you dont add these lines, you have to manually set the Pythonpath with every new terminal.
+
+pip install filelock pyqt5 mpi4py
 
 ### Gazbebo and Pedsim part
 * Install additional packages using `rosdep`
