@@ -166,7 +166,6 @@ export PYTHONPATH=""
 ```
 Note: if you dont add these lines, you have to manually set the Pythonpath with every new terminal.
 
-pip install filelock pyqt5 mpi4py
 
 ### Gazbebo and Pedsim part
 * Install additional packages using `rosdep`
