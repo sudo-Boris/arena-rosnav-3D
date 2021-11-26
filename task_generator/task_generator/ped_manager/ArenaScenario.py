@@ -96,7 +96,7 @@ class ArenaScenario():
         # creates pedsim-agents
         peds = []
         for id, spos, wpos in zip(ids, s_pos, w_pos):
-            peds.append({"name": "Pedestrian", "id": id, "pos": [*spos], "type": "adult", "yaml_file": "/home/daniel/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            peds.append({"name": "Pedestrian", "id": id, "pos": [*spos], "type": "adult", "yaml_file": "/home/daniel/catkin_ws_3D/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1, "vmax": 0.3, "start_up_mode": "default", "wait_time": 0.0, "trigger_zone_radius": 0.0, "chatting_probability": 0.01, "tell_story_probability": 0, "group_talking_probability": 0.01, "talking_and_walking_probability": 0.01,
             "requesting_service_probability": 0.01, "requesting_guide_probability": 0.01, "requesting_follower_probability": 0.01, "max_talking_distance": 5, "max_servicing_radius": 5, "talking_base_time": 10,
             "tell_story_base_time": 0, "group_talking_base_time": 10, "talking_and_walking_base_time": 6, "receiving_service_base_time": 20, "requesting_service_base_time": 30, "force_factor_desired": 1,

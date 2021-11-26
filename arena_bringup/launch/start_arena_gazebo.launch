@@ -1,7 +1,7 @@
 <launch>
   <!-- simulator arguments-->
   <arg name="train_mode" default="false"/>
-  <arg name="local_planner" default="rlca"         doc = "local_planer type [teb, dwa, mpc, rlca, cadrl]"/>
+  <arg name="local_planner" default="teb"         doc = "local_planer type [teb, dwa, mpc, rlca, cadrl]"/>
   <!--rlca are implemented but msg type not yet adjusted from 2D; dwa has a file missing (see project_task)-->
   <arg name="rviz_file" default="nav_LP"/>
   <arg name="disable_scenario" default="false"/>
@@ -9,7 +9,7 @@
   <arg name="enable_pedsim" default="true"/>
   <arg name="enable_pedvis" default="true"/>
   <arg name="outside" default="false"/>
-  <arg name="world" default="ignc_lab"   doc ="world type [turtlebot3_house, small_warehouse, aws_house, outside, ignc_lab]" unless="$(arg outside)"/>
+  <arg name="world" default="small_warehouse"   doc ="world type [turtlebot3_house, small_warehouse, aws_house, outside, ignc_lab]" unless="$(arg outside)"/>
   <arg name="world" default="outside"     if = "$(arg outside)"/>
   <arg name="model" default="burger"      doc = "model type [burger, waffle]"/>
   <arg name="scenario_file" default="$(arg world).json"/>
@@ -21,6 +21,7 @@
   <arg name="map_path" default="$(find simulator_setup)/maps/$(arg world)/map.yaml" />
   <arg name="task_mode" default="scenario" doc="task_mode type [scenario, random, manual]"/>
   <arg name="actors" default="3"/>
+  <arg name="actor_height" default="1.1"/>
 
   <param name="use_sim_time" value="true"/>
   <param name="train_mode" value="$(arg train_mode)" />
@@ -32,6 +33,8 @@
   <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
   <param name="use_rviz" value="$(arg use_rviz)"/>
   <param name="single_env" value="true"/>
+  <param name="actor_height" value="$(arg actor_height)" unless="$(eval arg('world') == 'arena_generated')"/>
+  <param name="actor_height" value="1.03" if="$(eval arg('world') == 'arena_generated')"/>
 
   <param name="robot_description" command="$(find xacro)/xacro $(find simulator_setup)/robot/urdf/turtlebot3_$(arg model).urdf.xacro" />
 
@@ -56,11 +59,11 @@
   <arg name="odom_ground_truth" default="/odometry/ground_truth"/>
 
   <!-- Adding actors to world  -->
-  <node name="generate_world" pkg="task_generator" type="generate_world.py" if="$(arg enable_pedsim)">
+  <!-- <node name="generate_world" pkg="task_generator" type="generate_world.py" if="$(arg enable_pedsim)">
     <param name="task_mode" value="$(arg task_mode)"/>
     <param name="actors" value="$(arg actors)"/>
     <param name="scenario_path" value="$(find simulator_setup)/scenarios/$(arg scenario_file)"/>
-  </node>
+  </node> -->
   <!-- map server-->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
     <param name="frame_id" value="$(arg global_frame_id)"/>

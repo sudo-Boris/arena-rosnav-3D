@@ -8,7 +8,7 @@
                 1.0
             ],
             "type": "forklift",
-            "yaml_file": "/home/daniel/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/big_forklift.model.yaml",
+            "yaml_file": "/home/ignc/catkin_ws_3D/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/big_forklift.model.yaml",
             "number_of_peds": 1,
             "vmax": 0.3,
             "start_up_mode": "default",
@@ -105,6 +105,6 @@
         3,
         3
     ],
-    "map_path": "/home/daniel/catkin_ws/src/arena-rosnav-3D/simulator_setup/maps/map_turtlebot3_house/map.yaml",
+    "map_path": "/home/daniel/catkin_ws_3D/src/arena-rosnav-3D/simulator_setup/maps/map_turtlebot3_house/map.yaml",
     "format": "arena-tools"
 }

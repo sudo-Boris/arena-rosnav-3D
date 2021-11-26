@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 import rospkg
 import rospy
@@ -9,7 +9,7 @@ from std_msgs.msg import Int16, String
 from nav_msgs.msg import Odometry
 from nav_msgs.srv import LoadMap
 from std_srvs.srv import Empty
-from pedsim_srvs.srv import SetObstacles
+# from pedsim_srvs.srv import SetObstacles
 from gazebo_msgs.srv import SetModelState, SpawnModelRequest, SpawnModel, DeleteModel
 import subprocess
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?> 
 <sdf version='1.6'>
   <world name='default'>
-    <plugin name="ActorPosesPlugin" filename="libActorPosesPlugin.so"/>
+    <plugin name="ActorPosePlugin" filename="libActorPosePlugin.so"/>
     <model name='ground_plane'>
       <static>1</static>
       <link name='link'>
