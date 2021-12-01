@@ -9,6 +9,7 @@ import time
 from stable_baselines3 import PPO
 
 from flatland_msgs.srv import StepWorld, StepWorldRequest
+from geometry_msgs.msg import Twist
 from rospy.exceptions import ROSException
 from std_msgs.msg import Bool
 
@@ -85,6 +86,12 @@ class DeploymentDRLAgent(BaseDRLAgent):
                 self._service_name_step, StepWorld
             )
 
+        self.STAND_STILL_ACTION = Twist()
+        self.STAND_STILL_ACTION.linear.x, self.STAND_STILL_ACTION.linear.z = (
+            0,
+            0,
+        )
+
     def setup_agent(self) -> None:
         """Loads the trained policy and when required the VecNormalize object."""
         model_file = os.path.join(
@@ -122,10 +129,13 @@ class DeploymentDRLAgent(BaseDRLAgent):
             #     self.call_service_takeSimStep(self._action_frequency)
             # else:
             #     self._wait_for_next_action_cycle()
-            obs = self.get_observations()[0]
-            action = self.get_action(obs)
-            # print(f"{action}")
-            self.publish_action(action)
+            goal_reached = rospy.get_param("/bool_goal_reached", default=False)
+            if goal_reached:
+                obs = self.get_observations()[0]
+                action = self.get_action(obs)
+                self.publish_action(action)
+            else:
+                self.publish_action(self.STAND_STILL_ACTION)
             time.sleep(self._action_cycle_duration)
 
     def _wait_for_next_action_cycle(self) -> None:
