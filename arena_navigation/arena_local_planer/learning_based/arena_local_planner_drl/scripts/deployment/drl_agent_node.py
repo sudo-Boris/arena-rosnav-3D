@@ -4,6 +4,7 @@ import pickle
 import rospy
 import rospkg
 import sys
+import time
 
 from stable_baselines3 import PPO
 
@@ -66,6 +67,17 @@ class DeploymentDRLAgent(BaseDRLAgent):
             action_space_path,
         )
 
+        # constants for action cycle controlling
+        self._step_size = rospy.get_param("step_size")
+        self._update_rate = rospy.get_param("update_rate")
+        # real time second in sim time
+        self._real_second_in_sim = self._step_size * self._update_rate
+        self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
+
+        self._action_cycle_duration = (
+            self._action_frequency / self._real_second_in_sim
+        )
+
         if self._is_train_mode:
             # step world to fast forward simulation time
             self._service_name_step = f"{self._ns}step_world"
@@ -106,13 +118,15 @@ class DeploymentDRLAgent(BaseDRLAgent):
             action publishing rate.
         """
         while not rospy.is_shutdown():
-            if self._is_train_mode:
-                self.call_service_takeSimStep(self._action_frequency)
-            else:
-                self._wait_for_next_action_cycle()
+            # if self._is_train_mode:
+            #     self.call_service_takeSimStep(self._action_frequency)
+            # else:
+            #     self._wait_for_next_action_cycle()
             obs = self.get_observations()[0]
             action = self.get_action(obs)
+            # print(f"{action}")
             self.publish_action(action)
+            time.sleep(self._action_cycle_duration)
 
     def _wait_for_next_action_cycle(self) -> None:
         """Stops the loop until a trigger message is sent by the ActionPublisher
@@ -153,5 +167,5 @@ def main(agent_name: str) -> None:
 
 
 if __name__ == "__main__":
-    AGENT_NAME = "rule_04"
+    AGENT_NAME = "pretrained_tb3"
     main(agent_name=AGENT_NAME)

@@ -71,8 +71,17 @@ class ObservationCollector:
         )
 
         self._laser_num_beams = num_lidar_beams
+
         # for frequency controlling
+        self._step_size = rospy.get_param("step_size")
+        self._update_rate = rospy.get_param("update_rate")
+        # real time second in sim time
+        self._real_second_in_sim = self._step_size * self._update_rate
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
+
+        self._action_cycle_duration = (
+            self._action_frequency / self._real_second_in_sim
+        )
 
         self._clock = Clock()
         self._scan = LaserScan()
@@ -80,6 +89,8 @@ class ObservationCollector:
         self._robot_vel = Twist()
         self._subgoal = Pose2D()
         self._globalplan = np.array([])
+
+        self._scan_stamp = None
 
         # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -100,7 +111,7 @@ class ObservationCollector:
         # need to evaulate each possibility
         if self._ext_time_sync:
             self._scan_sub = message_filters.Subscriber(
-                f"{self.ns_prefix}scan_mapped", LaserScan
+                f"{self.ns_prefix}scan", LaserScan
             )
             self._robot_state_sub = message_filters.Subscriber(
                 f"{self.ns_prefix}odom", Odometry
@@ -115,7 +126,7 @@ class ObservationCollector:
             self.ts.registerCallback(self.callback_odom_scan)
         else:
             self._scan_sub = rospy.Subscriber(
-                f"{self.ns_prefix}scan_mapped",
+                f"{self.ns_prefix}scan",
                 LaserScan,
                 self.callback_scan,
                 tcp_nodelay=True,
@@ -151,13 +162,17 @@ class ObservationCollector:
 
     def get_observations(self):
         # apply action time horizon
-        if self._is_train_mode:
-            self.call_service_takeSimStep(self._action_frequency)
-        else:
-            try:
-                rospy.wait_for_message(f"{self.ns_prefix}next_cycle", Bool)
-            except Exception:
-                pass
+        # if self._is_train_mode:
+        #     self.call_service_takeSimStep(self._action_frequency)
+        # else:
+        #     try:
+        #         rospy.wait_for_message(
+        #             f"{self.ns_prefix}next_cycle",
+        #             Bool,
+        #             timeout=self._action_cycle_duration,
+        #         )
+        #     except Exception:
+        #         pass
 
         if not self._ext_time_sync:
             # try to retrieve sync'ed obs
@@ -188,6 +203,7 @@ class ObservationCollector:
 
         self._laser_deque.clear()
         self._rs_deque.clear()
+        # print(f"Sync'ed obs stamp: {self._scan_stamp}")
         return merged_obs, obs_dict
 
     @staticmethod
