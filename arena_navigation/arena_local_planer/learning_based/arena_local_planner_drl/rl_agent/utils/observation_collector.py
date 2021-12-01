@@ -10,6 +10,10 @@ from collections import deque
 
 import time  # for debuging
 import threading
+import tf2_ros
+
+# for transformations
+from tf.transformations import *
 
 # observation msgs
 from sensor_msgs.msg import LaserScan
@@ -91,6 +95,12 @@ class ObservationCollector:
         self._globalplan = np.array([])
 
         self._scan_stamp = None
+
+        # testing #################################################
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+        self.rate = rospy.Rate(10.0)
+        ###########################################################
 
         # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -270,7 +280,26 @@ class ObservationCollector:
 
     def callback_odom_scan(self, scan, odom):
         self._scan = self.process_scan_msg(scan)
-        self._robot_pose, self._robot_vel = self.process_robot_state_msg(odom)
+        # odom
+        # self._robot_pose, self._robot_vel = self.process_robot_state_msg(odom)
+
+        # map -> base_footprint tf = robot pose
+        try:
+            tf = self.tfBuffer.lookup_transform(
+                "map", "base_footprint", rospy.Time()
+            )
+        except (
+            tf2_ros.LookupException,
+            tf2_ros.ConnectivityException,
+            tf2_ros.ExtrapolationException,
+        ):
+            self.rate.sleep()
+            print("No map to base_footprint transform!")
+            return
+
+        self._robot_pose, self._robot_vel = self.process_robot_state_tf(
+            tf, odom
+        )
 
     def callback_clock(self, msg_Clock):
         self._clock = msg_Clock.clock.to_sec()
@@ -328,6 +357,25 @@ class ObservationCollector:
 
     def process_subgoal_msg(self, msg_Subgoal):
         return self.pose3D_to_pose2D(msg_Subgoal.pose)
+
+    def process_robot_state_tf(self, tf, odom):
+        pose2d = Pose2D()
+        pose3d = tf.transform
+        pose2d.x = pose3d.translation.x
+        pose2d.y = pose3d.translation.y
+        quaternion = (
+            pose3d.rotation.x,
+            pose3d.rotation.y,
+            pose3d.rotation.z,
+            pose3d.rotation.w,
+        )
+        euler = euler_from_quaternion(quaternion)
+        yaw = euler[2]
+        pose2d.theta = yaw
+        # print(pose2d)
+
+        twist = odom.twist.twist
+        return pose2d, twist
 
     @staticmethod
     def process_global_plan_msg(globalplan):
