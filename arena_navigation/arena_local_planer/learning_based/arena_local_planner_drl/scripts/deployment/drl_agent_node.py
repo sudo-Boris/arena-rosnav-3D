@@ -137,7 +137,8 @@ class DRLAgent:
 
 
 if __name__ == "__main__":
-    AGENT_NAME = sys.argv[1]
+    # AGENT_NAME = sys.argv[1]
+    AGENT_NAME = 'rule_05'
     AGENT = DRLAgent(AGENT_NAME, NS_PREFIX)
 
     try:
