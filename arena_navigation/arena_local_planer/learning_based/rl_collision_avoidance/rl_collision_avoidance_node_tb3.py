@@ -58,6 +58,8 @@ class NN_tb3():
         self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
         self.sub_subgoal = rospy.Subscriber('/subgoal',PoseStamped, self.cbSubGoal)
         self.laser_sub = rospy.Subscriber('/scan_mapped', LaserScan, self.laser_scan_callback)
+        # self.laser_sub = rospy.Subscriber('/scan', LaserScan, self.laser_scan_callback)
+
 
         # control timer
         # self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
@@ -161,7 +163,8 @@ class NN_tb3():
     def get_laser_observation(self):
         scan = copy.deepcopy(self.scan)
         sub_array = np.hsplit(scan,4)  #adapt scan info when min and max angel equal to [-1.57,4.69] (rlca is [-3.14,3.14])
-        scan = np.concatenate((sub_array[3],sub_array[0],sub_array[1],sub_array[2]))   #adapt scan info when min and max angel equal to [-1.57,4.69] (rlca is [-3.14,3.14])
+        # Not necessary, since scan mapping node
+        # scan = np.concatenate((sub_array[3],sub_array[0],sub_array[1],sub_array[2]))   #adapt scan info when min and max angel equal to [-1.57,4.69] (rlca is [-3.14,3.14])
 
         scan[np.isnan(scan)] = 6.0
         scan[np.isinf(scan)] = 6.0
@@ -182,14 +185,19 @@ class NN_tb3():
         return scan_sparse / 6.0 - 0.5
 
     def control_vel(self, action):
-        move_cmd = Twist()
-        move_cmd.linear.x = action[0]
-        move_cmd.linear.y = 0.  # it's not necessary
-        move_cmd.linear.z = 0.
-        move_cmd.angular.x = 0.
-        move_cmd.angular.y = 0.
-        move_cmd.angular.z = action[1]
-        self.pub_twist.publish(move_cmd)
+        goal_reached = rospy.get_param("/bool_goal_reached")
+        if not goal_reached:
+            move_cmd = Twist()
+            move_cmd.linear.x = action[0]
+            move_cmd.linear.y = 0.  # it's not necessary
+            move_cmd.linear.z = 0.
+            move_cmd.angular.x = 0.
+            move_cmd.angular.y = 0.
+            move_cmd.angular.z = action[1]
+            print(action)
+            self.pub_twist.publish(move_cmd)
+        else:
+            self.stop_moving()
 
     # def control_pose(self, pose):
     #     pose_cmd = PoseStamped.Pose()
@@ -215,7 +223,7 @@ class NN_tb3():
     def cbComputeAction(self, event):
         while self.scan is None or self.sub_goal.x is None:
             pass
-        # ************************************ Inpsut ************************************
+        # ************************************ Input *************************************
         obs = self.get_laser_observation() 
         obs_stack = deque([obs, obs, obs])
         self.state = [self.pose.pose.position.x, self.pose.pose.position.y, self.psi]    # x, y, theta
@@ -228,7 +236,8 @@ class NN_tb3():
         # ************************************ Output ************************************
         _,scaled_action =generate_action_no_sampling(self.env, obs_state_list, self.policy, self.action_bound)
         action = scaled_action[0]
-        action[0] = 0.3*action[0]   # the maximum speed of cmd_vel 0.3
+        # action[0] = 0.3*action[0]   # the maximum speed of cmd_vel 0.3
+        action[0] = 0.22*action[0]   # the maximum speed of cmd_vel 0.22
         self.control_vel(action)               
         # self.update_action(action)
 

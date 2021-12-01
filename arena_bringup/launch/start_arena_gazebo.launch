@@ -1,11 +1,11 @@
 <launch>
   <!-- simulator arguments-->
   <arg name="train_mode" default="false"/>
-  <arg name="local_planner" default="teb"         doc = "local_planer type [teb, dwa, mpc, rlca, cadrl]"/>
+  <arg name="local_planner" default="drl"         doc = "local_planer type [teb, dwa, mpc, rlca, cadrl, drl]"/>
   <!--rlca are implemented but msg type not yet adjusted from 2D; dwa has a file missing (see project_task)-->
   <arg name="rviz_file" default="nav_LP"/>
   <arg name="disable_scenario" default="false"/>
-  <arg name="reset" default="true"/>
+  <arg name="reset" default="false"/>
   <arg name="enable_pedsim" default="true"/>
   <arg name="enable_pedvis" default="true"/>
   <arg name="outside" default="false"/>
@@ -51,6 +51,7 @@
   <!-- DRL action frequency -->
   <arg name="action_frequency" default="10"/>
   <param name="action_frequency" value="$(arg action_frequency)"/>
+  <param name="bool_goal_reached" value="true" />
 
   <!-- Map parameters -->
   <arg name="global_frame_id" value="map"/>
@@ -128,9 +129,9 @@
   <include file="$(find arena_bringup)/launch/sublaunch_testing/intermediate_planner.launch"/>
 
   <!-- makes sure that drl actions will be published according to sim time in eval mode-->
-  <group if="$(eval arg('train_mode') == false)">
+  <!-- <group if="$(eval arg('train_mode') == false)">
     <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
-  </group>
+  </group> -->
 
   <!-- Pedsim -->
   <arg name="simulation_factor" default="1"/>
