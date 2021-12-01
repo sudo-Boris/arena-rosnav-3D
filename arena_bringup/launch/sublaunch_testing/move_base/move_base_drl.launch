@@ -37,6 +37,6 @@
 
   <!-- action_publisher -->
   <!-- makes sure that drl actions will be published according to sim time in eval mode-->
-  <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
+  <!-- <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/> -->
 
 </launch>

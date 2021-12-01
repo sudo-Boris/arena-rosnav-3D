@@ -78,9 +78,6 @@ class BaseDRLAgent(ABC):
             self._ns_robot, self._num_laser_beams, self._laser_range, True
         )
 
-        # for time controlling in train mode
-        self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
-
         if self._is_train_mode:
             # w/o action publisher node
             self._action_pub = rospy.Publisher(
@@ -90,7 +87,7 @@ class BaseDRLAgent(ABC):
             # w/ action publisher node
             # (controls action rate being published on '../cmd_vel')
             self._action_pub = rospy.Publisher(
-                f"{self._ns_robot}cmd_vel_pub", Twist, queue_size=1
+                f"{self._ns_robot}cmd_vel", Twist, queue_size=1
             )
 
     @abstractmethod
@@ -264,7 +261,7 @@ class BaseDRLAgent(ABC):
         """
         merged_obs, obs_dict = self.observation_collector.get_observations()
         if self._agent_params["normalize"]:
-            self.normalize_observations(merged_obs)
+            merged_obs = self.normalize_observations(merged_obs)
         return merged_obs, obs_dict
 
     def normalize_observations(self, merged_obs: np.ndarray) -> np.ndarray:
