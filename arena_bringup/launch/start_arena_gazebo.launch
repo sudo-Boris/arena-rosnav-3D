@@ -83,7 +83,10 @@
     <param name="publish_frequency" type="double" value="50.0" />
   </node>
 
-
+  <!-- AMCL -->
+  <include file="$(find arena_bringup)/launch/amcl.launch">
+    <arg name="drl" value="true"/>
+  </include>
 
   <!-- use fake localization-->
   <include file="$(find arena_bringup)/launch/sublaunch_testing/fake_localization.launch">

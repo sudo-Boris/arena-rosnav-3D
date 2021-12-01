@@ -18,6 +18,7 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Path
 from rosgraph_msgs.msg import Clock
 from nav_msgs.msg import Odometry
+import tf2_ros
 
 # services
 from flatland_msgs.srv import StepWorld, StepWorldRequest
@@ -71,6 +72,12 @@ class ObservationCollector:
         self._robot_vel = Twist()
         self._subgoal = Pose2D()
         self._globalplan = np.array([])
+        
+        # testing #################################################
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+        self.rate = rospy.Rate(10.0)
+        ###########################################################
 
         # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -247,8 +254,22 @@ class ObservationCollector:
         return
 
     def callback_odom_scan(self, scan, odom):
+        # scan
         self._scan = self.process_scan_msg(scan)
-        self._robot_pose, self._robot_vel = self.process_robot_state_msg(odom)
+        # odom
+        # self._robot_pose, self._robot_vel = self.process_robot_state_msg(odom)
+
+        # map -> base_footprint tf = robot pose
+        try:
+            tf = self.tfBuffer.lookup_transform('map', 'base_footprint', rospy.Time())
+        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            self.rate.sleep()
+            print("No map to base_footprint transform!")
+            return
+
+        self._robot_pose, self._robot_vel = self.process_robot_state_tf(tf, odom)
+        
+
 
     def callback_scan(self, msg_laserscan):
         if len(self._laser_deque) == self.max_deque_size:
@@ -276,6 +297,25 @@ class ObservationCollector:
         scan[np.isnan(scan)] = msg_LaserScan.range_max
         msg_LaserScan.ranges = scan
         return msg_LaserScan
+
+    def process_robot_state_tf(self, tf, odom):
+        pose2d = Pose2D()
+        pose3d = tf.transform
+        pose2d.x = pose3d.translation.x
+        pose2d.y = pose3d.translation.y
+        quaternion = (
+            pose3d.rotation.x,
+            pose3d.rotation.y,
+            pose3d.rotation.z,
+            pose3d.rotation.w,
+        )
+        euler = euler_from_quaternion(quaternion)
+        yaw = euler[2]
+        pose2d.theta = yaw
+        print(pose2d)
+
+        twist = odom.twist.twist
+        return pose2d, twist
 
     def process_robot_state_msg(self, msg_Odometry):
         pose3d = msg_Odometry.pose.pose

@@ -15,9 +15,9 @@
   </node>
 
   <!-- AMCL -->
-  <include file="$(find arena_bringup)/launch/amcl.launch">
+  <!-- <include file="$(find arena_bringup)/launch/amcl.launch">
     <arg name="drl" value="true"/>
-  </include>
+  </include> -->
 
   <!-- spacial_horizon -->
   <node pkg="arena_spacial_horizon" type="spacial_horizon_node" name="spacial_horizon_node" output="screen">

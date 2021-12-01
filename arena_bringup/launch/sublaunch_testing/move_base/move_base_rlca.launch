@@ -15,9 +15,9 @@
   </node>
 
   <!-- AMCL -->
-  <include file="$(find arena_bringup)/launch/amcl.launch">
+  <!-- <include file="$(find arena_bringup)/launch/amcl.launch">
     <arg name="drl" value="true"/>
-  </include>
+  </include> -->
 
   <!-- scan mapping, because training and real scan calibration may differ -->
   <include file="$(find arena_bringup)/launch/map_scan.launch">
