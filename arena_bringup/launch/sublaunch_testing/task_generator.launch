@@ -1,5 +1,6 @@
 <launch>
     <arg name="world" default="outside"/>
+    <arg name="drl" default="true"/>
     <arg name="scenarios_json_path" default="$(find simulator_setup)/scenarios/$(arg world).json"/>
     <arg name="auto_reset" default="true" />
     <arg name="task_mode" default="random" doc="task_mode type [scenario, random]"/>
@@ -16,6 +17,7 @@
         <param name="delta" value="$(arg delta)"/>
         <param name="timeout" value="$(arg timeout)"/>
         <param name="world" value="$(arg world)"/>
+        <param name="drl" value="$(arg drl)"/>
         <param name="actors" value="$(arg actors)"/>
     </node>
 </launch>

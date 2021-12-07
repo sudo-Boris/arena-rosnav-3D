@@ -1,11 +1,11 @@
 <launch>
   <!-- simulator arguments-->
   <arg name="train_mode" default="false"/>
-  <arg name="local_planner" default="drl"         doc = "local_planer type [teb, dwa, mpc, rlca, cadrl, drl]"/>
+  <arg name="local_planner" default="teb"         doc = "local_planer type [teb, dwa, mpc, rlca, cadrl, drl]"/>
   <!--rlca are implemented but msg type not yet adjusted from 2D; dwa has a file missing (see project_task)-->
   <arg name="rviz_file" default="nav_LP"/>
   <arg name="disable_scenario" default="false"/>
-  <arg name="reset" default="false"/>
+  <arg name="reset" default="true"/> <!-- auto_reset for task generator -->
   <arg name="enable_pedsim" default="true"/>
   <arg name="enable_pedvis" default="true"/>
   <arg name="outside" default="false"/>
@@ -84,9 +84,9 @@
   </node>
 
   <!-- AMCL -->
-  <include file="$(find arena_bringup)/launch/amcl.launch">
+  <!-- <include file="$(find arena_bringup)/launch/amcl.launch">
     <arg name="drl" value="true"/>
-  </include>
+  </include> -->
 
   <!-- use fake localization-->
   <include file="$(find arena_bringup)/launch/sublaunch_testing/fake_localization.launch">
@@ -96,11 +96,13 @@
 
   <!-- start task_generator node -->
   <arg name="timeout" default="3.0"/>
+  <arg name="drl" default="false"/>
   <include file="$(find arena_bringup)/launch/sublaunch_testing/task_generator.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
     <arg name="scenarios_json_path" value="$(find simulator_setup)/scenarios/$(arg scenario_file)"/>
     <arg name="auto_reset" value="$(arg reset)"/>
     <arg name="timeout" value="$(arg timeout)"/>
     <arg name="world" value="$(arg world)"/>
+    <arg name="drl" value="$(arg drl)"/>
     <arg name="task_mode" value="$(arg task_mode)"/>
     <arg name="actors" value="$(arg actors)"/>
   </include>

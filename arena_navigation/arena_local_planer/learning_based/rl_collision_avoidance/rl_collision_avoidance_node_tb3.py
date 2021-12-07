@@ -57,8 +57,8 @@ class NN_tb3():
         self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1)
         self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
         self.sub_subgoal = rospy.Subscriber('/subgoal',PoseStamped, self.cbSubGoal)
-        self.laser_sub = rospy.Subscriber('/scan_mapped', LaserScan, self.laser_scan_callback)
-        # self.laser_sub = rospy.Subscriber('/scan', LaserScan, self.laser_scan_callback)
+        # self.laser_sub = rospy.Subscriber('/scan_mapped', LaserScan, self.laser_scan_callback)
+        self.laser_sub = rospy.Subscriber('/scan', LaserScan, self.laser_scan_callback)
 
 
         # control timer
@@ -283,6 +283,7 @@ def run():
     LASER_HIST = 3
     NUM_ENV = 1    # the number of agents in the environment
     OBS_SIZE = 512  # number of leaserbeam
+    
     action_bound = [[0, -1], [1, 1]]    # the limitation of velocity
 
     # Set env and agent policy

@@ -21,7 +21,7 @@ class RobotManager:
     is managed
     """
 
-    def __init__(self, ns, map_):
+    def __init__(self, ns, map_, drl_):
         # type (str, OccupancyGrid, str, int) -> None
         """[summary]
         Args:
@@ -33,10 +33,15 @@ class RobotManager:
         self.ROBOT_NAME = 'turtlebot3'
         self.ROBOT_DESCRIPTION = rospy.get_param("robot_description")
         self.update_map(map_)
+        self.DRL = drl_
         self._goal_pub = rospy.Publisher(
             '/subgoal', PoseStamped, queue_size=1, latch=True)
-        self.pub_mvb_goal = rospy.Publisher(
-            '/move_base_simple/goal', PoseStamped, queue_size=1, latch=True)
+        if not self.DRL:
+            self.pub_global_goal = rospy.Publisher(
+                '/move_base_simple/goal', PoseStamped, queue_size=1, latch=True)
+        else:
+            self.pub_global_goal = rospy.Publisher(
+                '/goal', PoseStamped, queue_size=1, latch=True)
         rospy.wait_for_service("/gazebo/spawn_urdf_model")
         rospy.wait_for_service('/gazebo/set_model_state')
         self._srv_spawn_model = rospy.ServiceProxy(
@@ -115,9 +120,10 @@ class RobotManager:
         goal.header.stamp = rospy.Time.now()
         goal.header.frame_id = "map"
         goal.pose = pose
-        self._goal_pub.publish(goal)
+        # remove, since we have external node for subgoals (Spatial Horizon)
+        # self._goal_pub.publish(goal)
         # added by Elias for communication with move_base
-        self.pub_mvb_goal.publish(goal)
+        self.pub_global_goal.publish(goal)
 
     def set_start_pos_random(self):
         start_pos = Pose()

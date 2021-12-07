@@ -370,14 +370,14 @@ class ScenarioTask(ABSTask):
         return info
 
 
-def get_predefined_task(ns, mode="random", start_stage=1, PATHS=None):
+def get_predefined_task(ns, mode="random", start_stage=1, PATHS=None, drl_=True):
     # type: (str, str, int, dict) -> None
 
     # get the map
     service_client_get_map = rospy.ServiceProxy("/static_map", GetMap)
     map_response = service_client_get_map()
 
-    robot_manager = RobotManager(ns="", map_=map_response.map)
+    robot_manager = RobotManager(ns="", map_=map_response.map, drl_=drl_)
     obstacle_manager = ObstaclesManager(ns="", map_=map_response.map)
     pedsim_manager = PedsimManager()
 

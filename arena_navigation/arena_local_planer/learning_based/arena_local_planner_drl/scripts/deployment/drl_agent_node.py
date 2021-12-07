@@ -1,17 +1,18 @@
 #!/usr/bin/env python
+from math import inf
 import os
 import pickle
 import rospy
 import rospkg
 import sys
-import time
 
 from stable_baselines3 import PPO
 
 from flatland_msgs.srv import StepWorld, StepWorldRequest
-from geometry_msgs.msg import Twist
 from rospy.exceptions import ROSException
+from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
+import numpy as np
 
 from rl_agent.base_agent_wrapper import BaseDRLAgent
 
@@ -26,7 +27,6 @@ DEFAULT_ACTION_SPACE = os.path.join(
     "configs",
     "default_settings.yaml",
 )
-
 
 class DeploymentDRLAgent(BaseDRLAgent):
     def __init__(
@@ -52,14 +52,14 @@ class DeploymentDRLAgent(BaseDRLAgent):
         """
         self._is_train_mode = rospy.get_param("/train_mode")
         if not self._is_train_mode:
-            rospy.init_node(f"DRL_local_planner", anonymous=True)
+            rospy.init_node("DRL_local_planner", anonymous=True)
 
         self.name = agent_name
-        self.setup_agent()
 
         hyperparameter_path = os.path.join(
             TRAINED_MODELS_DIR, self.name, "hyperparameters.json"
         )
+
         super().__init__(
             ns,
             robot_name,
@@ -67,16 +67,7 @@ class DeploymentDRLAgent(BaseDRLAgent):
             action_space_path,
         )
 
-        # constants for action cycle controlling
-        self._step_size = rospy.get_param("step_size")
-        self._update_rate = rospy.get_param("update_rate")
-        # real time second in sim time
-        self._real_second_in_sim = self._step_size * self._update_rate
-        self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
-
-        self._action_cycle_duration = (
-            self._action_frequency / self._real_second_in_sim
-        )
+        self.setup_agent()
 
         if self._is_train_mode:
             # step world to fast forward simulation time
@@ -84,12 +75,9 @@ class DeploymentDRLAgent(BaseDRLAgent):
             self._sim_step_client = rospy.ServiceProxy(
                 self._service_name_step, StepWorld
             )
+        
+        self.STAND_STILL_ACTION = [0, 0]
 
-        self.STAND_STILL_ACTION = Twist()
-        self.STAND_STILL_ACTION.linear.x, self.STAND_STILL_ACTION.linear.z = (
-            0,
-            0,
-        )
 
     def setup_agent(self) -> None:
         """Loads the trained policy and when required the VecNormalize object."""
@@ -103,15 +91,16 @@ class DeploymentDRLAgent(BaseDRLAgent):
         assert os.path.isfile(
             model_file
         ), f"Compressed model cannot be found at {model_file}!"
-        assert os.path.isfile(
-            vecnorm_file
-        ), f"VecNormalize file cannot be found at {vecnorm_file}!"
-
-        with open(vecnorm_file, "rb") as file_handler:
-            vec_normalize = pickle.load(file_handler)
-
         self._agent = PPO.load(model_file).policy
-        self._obs_norm_func = vec_normalize.normalize_obs
+
+        if self._agent_params["normalize"]:
+            assert os.path.isfile(
+                vecnorm_file
+            ), f"VecNormalize file cannot be found at {vecnorm_file}!"
+
+            with open(vecnorm_file, "rb") as file_handler:
+                vec_normalize = pickle.load(file_handler)
+            self._obs_norm_func = vec_normalize.normalize_obs
 
     def run(self) -> None:
         """Loop for running the agent until ROS is shutdown.
@@ -129,13 +118,13 @@ class DeploymentDRLAgent(BaseDRLAgent):
             # else:
             #     self._wait_for_next_action_cycle()
             goal_reached = rospy.get_param("/bool_goal_reached", default=False)
-            if goal_reached:
+            if not goal_reached:
                 obs = self.get_observations()[0]
+                obs = np.where(obs==inf, 3.5, obs)
                 action = self.get_action(obs)
                 self.publish_action(action)
             else:
                 self.publish_action(self.STAND_STILL_ACTION)
-            time.sleep(self._action_cycle_duration)
 
     def _wait_for_next_action_cycle(self) -> None:
         """Stops the loop until a trigger message is sent by the ActionPublisher
@@ -174,5 +163,7 @@ def main(agent_name: str) -> None:
 
 
 if __name__ == "__main__":
-    AGENT_NAME = "pretrained_tb3"
+    # AGENT_NAME = "AGENT_21_2021_12_02__22_55"
+    AGENT_NAME = "AGENT_21_2021_12_02__22_56"
+    # AGENT_NAME = "rule_05"
     main(agent_name=AGENT_NAME)

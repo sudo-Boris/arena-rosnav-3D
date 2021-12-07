@@ -22,7 +22,7 @@ plugins:
     body: base_footprint
     odom_frame_id: odom
     odom_pub: odom  # topic odom is published on
-    pub_rate: 100
+    pub_rate: 30
   
   - type: Laser
     name: static_laser

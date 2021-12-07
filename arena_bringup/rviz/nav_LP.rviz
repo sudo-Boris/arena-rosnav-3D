@@ -677,13 +677,13 @@ Visualization Manager:
       Queue Size: 1
       Value: true
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /planning_vis/goal
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -842,7 +842,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -6.319957256317139
+      Angle: -6.3399577140808105
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -854,8 +854,8 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Scale: 95.63054656982422
       Target Frame: <Fixed Frame>
-      X: 3.7256128787994385
-      Y: 2.5324673652648926
+      X: 2.7374796867370605
+      Y: 2.2848877906799316
     Saved: ~
 Window Geometry:
   Displays:

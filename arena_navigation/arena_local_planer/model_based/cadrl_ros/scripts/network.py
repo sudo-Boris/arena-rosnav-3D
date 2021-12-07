@@ -2,6 +2,7 @@ import os
 import re
 import numpy as np
 import tensorflow as tf
+from tensorflow import keras
 import time
 
 class Actions():
@@ -78,7 +79,7 @@ class NetworkVP_rnn(NetworkVPCore):
         self._create_graph_inputs()
 
         if Config.USE_REGULARIZATION:
-            regularizer = tf.contrib.layers.l2_regularizer(scale=0.0)
+            regularizer = keras.regularizers.L2(l2=0.0)
         else:
             regularizer = None
 
@@ -97,13 +98,13 @@ class NetworkVP_rnn(NetworkVPCore):
             self.host_agent_vec = self.x_normalized[:,Config.FIRST_STATE_INDEX:Config.HOST_AGENT_STATE_SIZE+Config.FIRST_STATE_INDEX:]
             self.other_agent_vec = self.x_normalized[:,Config.HOST_AGENT_STATE_SIZE+Config.FIRST_STATE_INDEX:]
             self.other_agent_seq = tf.reshape(self.other_agent_vec, [-1, max_length, Config.OTHER_AGENT_FULL_OBSERVATION_LENGTH])
-            self.rnn_outputs, self.rnn_state = tf.nn.dynamic_rnn(tf.contrib.rnn.LSTMCell(num_hidden), self.other_agent_seq, dtype=tf.float32, sequence_length=self.num_other_agents)
-            self.rnn_output = self.rnn_state.h
+            self.rnn_outputs, self.rnn_state = keras.layers.RNN(keras.layers.LSTMCell(num_hidden), self.other_agent_seq, dtype=tf.float32, sequence_length=self.num_other_agents)
+            self.rnn_output = self.rnn_state[0]
             self.layer1_input = tf.concat([self.host_agent_vec, self.rnn_output],1, name='layer1_input')
             self.layer1 = tf.layers.dense(inputs=self.layer1_input, units=256, activation=tf.nn.relu, kernel_regularizer=regularizer, name = 'layer1')
 
         self.layer2 = tf.layers.dense(inputs=self.layer1, units=256, activation=tf.nn.relu, name = 'layer2')
-        self.final_flat = tf.contrib.layers.flatten(self.layer2)
+        self.final_flat = keras.layers.flatten(self.layer2)
         
         # Use shared parent class to construct graph outputs/objectives
         self._create_graph_outputs()

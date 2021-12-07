@@ -25,10 +25,11 @@ class TaskGenerator:
         self.sr = rospy.Publisher('/scenario_reset', Int16, queue_size=1)
         self.nr = 0
         mode = rospy.get_param("~task_mode")
+        drl = rospy.get_param("~drl")
 
         scenarios_json_path = rospy.get_param("~scenarios_json_path")
         paths = {"scenario": scenarios_json_path}
-        self.task = get_predefined_task("", mode, PATHS=paths)
+        self.task = get_predefined_task("", mode, PATHS=paths, drl_=drl)
         self.rospack = rospkg.RosPack()
 
         # if auto_reset is set to true, the task generator will automatically reset the task
